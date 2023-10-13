@@ -1,0 +1,39 @@
+type Approval @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  spender: Bytes! # address
+  value: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Transfer @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  value: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Activity @entity(immutable: true) {
+  id: ID!
+  type: String!
+  from: Bytes!
+  to: Bytes!
+  timestamp: BigInt!
+  nft: NFT!
+}
+
+type NFT @entity(immutable: false) { #Got triggered when Listed function is called
+  id: ID! #CollectionAddress-TokenID
+  collectionAddress: Bytes!
+  owner: Bytes!
+  uri: String!
+  price: BigDecimal
+  tokenForPayment: Bytes
+  collectionName: String!
+  # activities: [Activity!]! @derivedFrom(field: "nft")
+}
