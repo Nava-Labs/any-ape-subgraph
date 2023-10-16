@@ -3,29 +3,6 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: ERC20
-    network: mumbai
-    source:
-      address: "0x5C951Fe0BfB74ce4e64329E56FFc29C46CF77eD1"
-      abi: Contract
-      startBlock: 41259953
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Approval
-        - Transfer
-      abis:
-        - name: Contract
-          file: ./abis/Contract.json
-      eventHandlers:
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-      file: ./src/contract.ts
-  - kind: ethereum
     name: NFT
     network: mumbai
     source:
