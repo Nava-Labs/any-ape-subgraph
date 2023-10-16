@@ -43,7 +43,6 @@ export function handleSale(saleEvent: SaleEvent): void{
   nft.collectionAddress = saleEvent.params.collectionAddr;
   activity.price = nft.price; //preserve the price
   nft.price = ZERO_BI; //delist
-  nft.collectionAddress = ADDRESS_ZERO; //delist
   activity.nft = tokenId;
   nft.save();
   activity.save();
@@ -81,32 +80,3 @@ export function fetchUri(collectionAddr: Address, tokenId: BigInt): string {
   }
   return data
 }
-
-// export function updateListed(type: String, from: Bytes, to: Bytes): void {
-//   let finalListedItems = ListedItems.load(from)
-//   let activity = "Sale";
-//   switch(type){
-//     case "0": //Sale Cross-Chain
-//       activity = "Sale Cross-Chain";
-//       break;
-//     case "1": //Sale Native
-//       activity = "Sale Native";
-//       break;
-//   }
-//   finalListedItems.save();
-// }
-
-// export function handleTransfer(transfer: TransferEvent): void {
-//   let transferNFT = Activity.load(transfer.address.toHex())
-//   if (fairAuctionFactory == null) {
-//     fairAuctionFactory = new FairAuctionFactory(event.address.toHex())
-//   }
-//   if (transfer.params.from == ADDRESS_ZERO) {
-//     updateActivity(transfer.params.to, true, transfer.params.value)
-//     updateTotalSupply(transfer.address, true, transfer.params.value)
-//   }
-
-// }
-
-// To do create multicall helper
-
