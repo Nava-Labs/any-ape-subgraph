@@ -16,7 +16,6 @@ export function handleListed(listedEvent: ListedEvent): void {
     nft.owner = fetchNftOwner(listedEvent.address, listedEvent.params.tokenId);
     nft.collectionName = fetchCollectionName(listedEvent.params.collectionAddr);
     nft.uri = fetchUri(listedEvent.params.collectionAddr, listedEvent.params.tokenId)
-    nft.price = listedEvent.params.price;
   }
   nft.price = listedEvent.params.price;
   nft.save()
@@ -37,7 +36,10 @@ export function handleSale(saleEvent: SaleEvent): void{
   let nft = NFT.load(tokenId);
   if (nft==null){ //shouldnt be possible but just in case.
     nft = new NFT(tokenId);
+    nft.collectionName = fetchCollectionName(saleEvent.params.collectionAddr);
+    nft.uri = fetchUri(saleEvent.params.collectionAddr, saleEvent.params.tokenId);
   }
+  nft.owner = fetchNftOwner(saleEvent.address, saleEvent.params.tokenId);
   nft.collectionAddress = saleEvent.params.collectionAddr;
   activity.price = nft.price; //preserve the price
   nft.price = ZERO_BI; //delist
