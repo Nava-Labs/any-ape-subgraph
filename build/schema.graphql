@@ -17,3 +17,25 @@ type Transfer @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type Activity @entity(immutable: true) {
+  id: ID!
+  type: String!
+  from: Bytes!
+  to: Bytes!
+  timestamp: BigInt!
+  price: BigInt
+  tokenForPayment: Bytes
+  nft: NFT!
+}
+
+type NFT @entity(immutable: false) { #Got triggered when Listed function is called
+  id: ID! #CollectionAddress-TokenID
+  collectionAddress: Bytes!
+  owner: Bytes!
+  uri: String!
+  price: BigInt
+  tokenForPayment: Bytes
+  collectionName: String!
+  activity: [Activity]! @derivedFrom(field: "nft")
+}

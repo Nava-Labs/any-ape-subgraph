@@ -342,6 +342,40 @@ export class Activity extends Entity {
     this.set("timestamp", Value.fromBigInt(value));
   }
 
+  get price(): BigInt | null {
+    let value = this.get("price");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set price(value: BigInt | null) {
+    if (!value) {
+      this.unset("price");
+    } else {
+      this.set("price", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get tokenForPayment(): Bytes | null {
+    let value = this.get("tokenForPayment");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set tokenForPayment(value: Bytes | null) {
+    if (!value) {
+      this.unset("tokenForPayment");
+    } else {
+      this.set("tokenForPayment", Value.fromBytes(<Bytes>value));
+    }
+  }
+
   get nft(): string {
     let value = this.get("nft");
     if (!value || value.kind == ValueKind.NULL) {
@@ -434,20 +468,20 @@ export class NFT extends Entity {
     this.set("uri", Value.fromString(value));
   }
 
-  get price(): BigDecimal | null {
+  get price(): BigInt | null {
     let value = this.get("price");
     if (!value || value.kind == ValueKind.NULL) {
       return null;
     } else {
-      return value.toBigDecimal();
+      return value.toBigInt();
     }
   }
 
-  set price(value: BigDecimal | null) {
+  set price(value: BigInt | null) {
     if (!value) {
       this.unset("price");
     } else {
-      this.set("price", Value.fromBigDecimal(<BigDecimal>value));
+      this.set("price", Value.fromBigInt(<BigInt>value));
     }
   }
 
@@ -479,5 +513,27 @@ export class NFT extends Entity {
 
   set collectionName(value: string) {
     this.set("collectionName", Value.fromString(value));
+  }
+
+  get activity(): ActivityLoader {
+    return new ActivityLoader("NFT", this.get("id")!.toString(), "activity");
+  }
+}
+
+export class ActivityLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Activity[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Activity[]>(value);
   }
 }

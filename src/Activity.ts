@@ -1,38 +1,113 @@
 import { BigInt, BigDecimal, store, Address, Bytes } from '@graphprotocol/graph-ts'
-import { EsperPresaleSync as EsperPresaleSyncEvent, Buy } from '../types/EsperPresale/EsperPresale'
+import {
+  Listed as ListedEvent,
+  Sale as SaleEvent
+} from "../generated/NFTMarketplaceDummy/NFTMarketplaceDummy"
+import { NFT, Activity } from "../generated/schema"
+import { ERC721 } from "../generated/NFT/ERC721"
+import { ADDRESS_ZERO, ZERO_BI } from './helpers'
 
-export function handleListed(listed: ListedEvent): void {
-  // if (listed.params.from == ADDRESS_ZERO) { //mint
-  //   updateUserBalance(transfer.params.to, true, transfer.params.value)
-  //   updateTotalSupply(transfer.address, true, transfer.params.value)
-  // }
+export function handleListed(listedEvent: ListedEvent): void {
+  let nftId = listedEvent.params.collectionAddr.toHex() + '-' + listedEvent.params.tokenId.toString();
+  let nft = NFT.load(nftId);
+  if (nft == null){
+    nft = new NFT(nftId);
+    nft.collectionAddress = listedEvent.params.collectionAddr;
+    nft.owner = fetchNftOwner(listedEvent.address, listedEvent.params.tokenId);
+    nft.collectionName = fetchCollectionName(listedEvent.params.collectionAddr);
+    nft.uri = fetchUri(listedEvent.params.collectionAddr, listedEvent.params.tokenId)
+    nft.price = listedEvent.params.price;
+    nft.tokenForPayment = listedEvent.params.paymentTokenAddr
+  }
+  nft.price = listedEvent.params.price;
+  nft.tokenForPayment = listedEvent.params.paymentTokenAddr
+  nft.save()
 }
 
-export function updateListed(type: String, from: Bytes, to: Bytes): void {
-  let finalListedItems = ListedItems.load(from)
-  let activity = "Sale";
-  switch(type){
-    case "0": //Sale Cross-Chain
-      activity = "Sale Cross-Chain";
-      break;
-    case "1": //Sale Native
-      activity = "Sale Native";
-      break;
-  }
-  finalListedItems.save();
-}
-
-export function handleTransfer(transfer: TransferEvent): void {
-  let transferNFT = Activity.load(transfer.address.toHex())
-  if (fairAuctionFactory == null) {
-    fairAuctionFactory = new FairAuctionFactory(event.address.toHex())
-  }
-  if (transfer.params.from == ADDRESS_ZERO) {
-    updateActivity(transfer.params.to, true, transfer.params.value)
-    updateTotalSupply(transfer.address, true, transfer.params.value)
+export function handleSale(saleEvent: SaleEvent): void{
+  let saleId = saleEvent.address.toHex() + '-' + saleEvent.block.timestamp.toString();
+  let tokenId = saleEvent.params.collectionAddr.toHex() + '-' + saleEvent.params.tokenId.toString();
+  let activity = Activity.load(saleId);
+  if (activity == null) {
+    activity = new Activity(saleId);
+    activity.type = saleEvent.params.saleType;
+    activity.from = saleEvent.params.prevOwner;
+    activity.to = saleEvent.params.newOwner;
+    activity.timestamp = saleEvent.block.timestamp;
   }
 
+  let nft = NFT.load(tokenId);
+  if (nft==null){ //shouldnt be possible but just in case.
+    nft = new NFT(tokenId);
+  }
+  nft.collectionAddress = saleEvent.params.collectionAddr;
+  activity.price = nft.price; //preserve the price
+  activity.tokenForPayment = nft.tokenForPayment;
+  nft.price = ZERO_BI; //delist
+  nft.collectionAddress = ADDRESS_ZERO; //delist
+  activity.nft = tokenId;
+  nft.save();
+  activity.save();
 }
+
+export function fetchCollectionName(collectionAddr: Address): string {
+  let contract = ERC721.bind(collectionAddr);
+  let data = "";
+  let result = contract.try_name()
+  if (result.reverted) {
+  } else {
+    data = result.value
+  }
+  return data
+}
+
+export function fetchNftOwner(collectionAddr: Address, tokenId: BigInt): Bytes {
+  let contract = ERC721.bind(collectionAddr);
+  let owner = collectionAddr;
+  let result = contract.try_ownerOf(tokenId)
+  if (result.reverted) {
+  } else {
+    owner = result.value
+  }
+  return owner
+}
+
+export function fetchUri(collectionAddr: Address, tokenId: BigInt): string {
+  let contract = ERC721.bind(collectionAddr);
+  let data = "";
+  let result = contract.try_tokenURI(tokenId)
+  if (result.reverted) {
+  } else {
+    data = result.value
+  }
+  return data
+}
+
+// export function updateListed(type: String, from: Bytes, to: Bytes): void {
+//   let finalListedItems = ListedItems.load(from)
+//   let activity = "Sale";
+//   switch(type){
+//     case "0": //Sale Cross-Chain
+//       activity = "Sale Cross-Chain";
+//       break;
+//     case "1": //Sale Native
+//       activity = "Sale Native";
+//       break;
+//   }
+//   finalListedItems.save();
+// }
+
+// export function handleTransfer(transfer: TransferEvent): void {
+//   let transferNFT = Activity.load(transfer.address.toHex())
+//   if (fairAuctionFactory == null) {
+//     fairAuctionFactory = new FairAuctionFactory(event.address.toHex())
+//   }
+//   if (transfer.params.from == ADDRESS_ZERO) {
+//     updateActivity(transfer.params.to, true, transfer.params.value)
+//     updateTotalSupply(transfer.address, true, transfer.params.value)
+//   }
+
+// }
 
 // To do create multicall helper
 
