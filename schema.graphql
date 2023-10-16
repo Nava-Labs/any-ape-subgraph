@@ -25,7 +25,6 @@ type Activity @entity(immutable: true) {
   to: Bytes!
   timestamp: BigInt!
   price: BigInt
-  tokenForPayment: Bytes
   nft: NFT!
 }
 
@@ -35,7 +34,6 @@ type NFT @entity(immutable: false) { #Got triggered when Listed function is call
   owner: Bytes!
   uri: String!
   price: BigInt
-  tokenForPayment: Bytes
   collectionName: String!
   activity: [Activity]! @derivedFrom(field: "nft")
 }

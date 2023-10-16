@@ -17,10 +17,8 @@ export function handleListed(listedEvent: ListedEvent): void {
     nft.collectionName = fetchCollectionName(listedEvent.params.collectionAddr);
     nft.uri = fetchUri(listedEvent.params.collectionAddr, listedEvent.params.tokenId)
     nft.price = listedEvent.params.price;
-    nft.tokenForPayment = listedEvent.params.paymentTokenAddr
   }
   nft.price = listedEvent.params.price;
-  nft.tokenForPayment = listedEvent.params.paymentTokenAddr
   nft.save()
 }
 
@@ -42,7 +40,6 @@ export function handleSale(saleEvent: SaleEvent): void{
   }
   nft.collectionAddress = saleEvent.params.collectionAddr;
   activity.price = nft.price; //preserve the price
-  activity.tokenForPayment = nft.tokenForPayment;
   nft.price = ZERO_BI; //delist
   nft.collectionAddress = ADDRESS_ZERO; //delist
   activity.nft = tokenId;

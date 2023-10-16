@@ -359,23 +359,6 @@ export class Activity extends Entity {
     }
   }
 
-  get tokenForPayment(): Bytes | null {
-    let value = this.get("tokenForPayment");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set tokenForPayment(value: Bytes | null) {
-    if (!value) {
-      this.unset("tokenForPayment");
-    } else {
-      this.set("tokenForPayment", Value.fromBytes(<Bytes>value));
-    }
-  }
-
   get nft(): string {
     let value = this.get("nft");
     if (!value || value.kind == ValueKind.NULL) {
@@ -482,23 +465,6 @@ export class NFT extends Entity {
       this.unset("price");
     } else {
       this.set("price", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get tokenForPayment(): Bytes | null {
-    let value = this.get("tokenForPayment");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set tokenForPayment(value: Bytes | null) {
-    if (!value) {
-      this.unset("tokenForPayment");
-    } else {
-      this.set("tokenForPayment", Value.fromBytes(<Bytes>value));
     }
   }
 
