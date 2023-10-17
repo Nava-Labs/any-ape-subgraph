@@ -1,37 +1,14 @@
-specVersion: 0.0.5
+specVersion: 0.0.4
 schema:
   file: schema.graphql
 dataSources:
   - kind: ethereum
-    name: ERC20
-    network: mumbai
-    source:
-      address: "0x5C951Fe0BfB74ce4e64329E56FFc29C46CF77eD1"
-      abi: Contract
-      startBlock: 41259953
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Approval
-        - Transfer
-      abis:
-        - name: Contract
-          file: ERC20/abis/Contract.json
-      eventHandlers:
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-      file: ERC20/ERC20.wasm
-  - kind: ethereum
     name: NFT
     network: mumbai
     source:
-      address: "0x37409A3E9542d4078d6aED82531E4EEE9bba165a"
-      abi: NFTMarketplaceDummy
-      startBlock: 41259953
+      address: "0x4A62e4036B0259BB1eF3c9Bbf0Ef3fE046983eA0"
+      abi: NFTMarketplaceMumbai
+      startBlock: 41281393
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -40,13 +17,13 @@ dataSources:
         - NFT
         - Activity
       abis:
-        - name: NFTMarketplaceDummy
-          file: NFT/abis/NFTMarketplaceDummy.json
+        - name: NFTMarketplaceMumbai
+          file: NFT/abis/NFTMarketplaceMumbai.json
         - name: ERC721
           file: NFT/abis/ERC721.json
       eventHandlers:
-        - event: Listed(address,uint256,address,address,uint256)
+        - event: Listing(indexed address,indexed address,uint256,uint256)
           handler: handleListed
-        - event: Sale(string,address,uint256,address,address,address,uint256)
+        - event: Sale(indexed uint8,indexed address,indexed address,address,uint256,uint256)
           handler: handleSale
       file: NFT/NFT.wasm

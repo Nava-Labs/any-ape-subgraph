@@ -1,49 +1,59 @@
 import { BigInt, BigDecimal, store, Address, Bytes } from '@graphprotocol/graph-ts'
 import {
-  Listed as ListedEvent,
+  Listing as ListedEvent,
   Sale as SaleEvent
-} from "../generated/NFTMarketplaceDummy/NFTMarketplaceDummy"
-import { NFT, Activity } from "../generated/schema"
+} from "../generated/NFT/NFTMarketplaceMumbai"
+import { ListedNFT, Activity } from "../generated/schema"
 import { ERC721 } from "../generated/NFT/ERC721"
 import { ADDRESS_ZERO, ZERO_BI } from './helpers'
 
 export function handleListed(listedEvent: ListedEvent): void {
-  let nftId = listedEvent.params.collectionAddr.toHex() + '-' + listedEvent.params.tokenId.toString();
-  let nft = NFT.load(nftId);
+  let nftId = listedEvent.params.tokenAddress.toHex() + '-' + listedEvent.params.tokenId.toString();
+  let nft = ListedNFT.load(nftId);
   if (nft == null){
-    nft = new NFT(nftId);
-    nft.collectionAddress = listedEvent.params.collectionAddr;
-    nft.owner = fetchNftOwner(listedEvent.address, listedEvent.params.tokenId);
-    nft.collectionName = fetchCollectionName(listedEvent.params.collectionAddr);
-    nft.uri = fetchUri(listedEvent.params.collectionAddr, listedEvent.params.tokenId)
+    nft = new ListedNFT(nftId);
   }
+  nft.collectionAddress = listedEvent.params.tokenAddress;
+  nft.owner = listedEvent.params.ownerAddress;
+  nft.collectionName = fetchCollectionName(listedEvent.params.tokenAddress);
+  nft.uri = fetchUri(listedEvent.params.tokenAddress, listedEvent.params.tokenId)
   nft.price = listedEvent.params.price;
   nft.save()
 }
 
 export function handleSale(saleEvent: SaleEvent): void{
   let saleId = saleEvent.address.toHex() + '-' + saleEvent.block.timestamp.toString();
-  let tokenId = saleEvent.params.collectionAddr.toHex() + '-' + saleEvent.params.tokenId.toString();
+  let tokenId = saleEvent.params.tokenAddress.toHex() + '-' + saleEvent.params.tokenId.toString();
   let activity = Activity.load(saleId);
   if (activity == null) {
     activity = new Activity(saleId);
-    activity.type = saleEvent.params.saleType;
-    activity.from = saleEvent.params.prevOwner;
-    activity.to = saleEvent.params.newOwner;
-    activity.timestamp = saleEvent.block.timestamp;
+  }
+  let type = "";
+  switch(saleEvent.params.saleType){ //saleType is enum so needs to add conditional
+    case 0:
+      type = "Sale Native"
+      break;
+    case 1:
+      type = "Sale Cross Chain"
+      break;
+  }
+  activity.type = type;
+  activity.from = saleEvent.params.prevOwner;
+  activity.to = saleEvent.params.newOwner;
+  activity.timestamp = saleEvent.block.timestamp;
+
+  let nft = ListedNFT.load(tokenId);
+  if (nft==null){ //shouldnt be possible but just in case.
+    nft = new ListedNFT(tokenId);
   }
 
-  let nft = NFT.load(tokenId);
-  if (nft==null){ //shouldnt be possible but just in case.
-    nft = new NFT(tokenId);
-    nft.collectionName = fetchCollectionName(saleEvent.params.collectionAddr);
-    nft.uri = fetchUri(saleEvent.params.collectionAddr, saleEvent.params.tokenId);
-  }
-  nft.owner = fetchNftOwner(saleEvent.address, saleEvent.params.tokenId);
-  nft.collectionAddress = saleEvent.params.collectionAddr;
+  nft.collectionName = fetchCollectionName(saleEvent.params.tokenAddress);
+  nft.uri = fetchUri(saleEvent.params.tokenAddress, saleEvent.params.tokenId);
+  nft.owner = saleEvent.params.newOwner;
+  nft.collectionAddress = saleEvent.params.tokenAddress;
   activity.price = nft.price; //preserve the price
   nft.price = ZERO_BI; //delist
-  activity.nft = tokenId;
+  activity.listedNFT = tokenId;
   nft.save();
   activity.save();
 }

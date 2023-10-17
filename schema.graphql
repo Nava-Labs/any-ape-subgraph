@@ -5,15 +5,15 @@ type Activity @entity(immutable: true) {
   to: Bytes!
   timestamp: BigInt!
   price: BigInt
-  nft: NFT!
+  listedNFT: ListedNFT!
 }
 
-type NFT @entity(immutable: false) { #Got triggered when Listed function is called
+type ListedNFT @entity(immutable: false) { #Got triggered when Listed function is called
   id: ID! #CollectionAddress-TokenID
   collectionAddress: Bytes!
   owner: Bytes!
   uri: String!
   price: BigInt
   collectionName: String!
-  activity: [Activity]! @derivedFrom(field: "nft")
+  activity: [Activity]! @derivedFrom(field: "listedNFT")
 }
