@@ -25,7 +25,7 @@ export function handleListed(listedEvent: ListedEvent): void {
   if (activity == null) {
     activity = new Activity(saleId);
   }
-  activity.type = "Listing";
+  activity.type = "List";
   activity.from = listedEvent.params.ownerAddress;
   activity.to = Bytes.empty();
   activity.timestamp = listedEvent.block.timestamp;
