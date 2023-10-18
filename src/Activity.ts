@@ -18,6 +18,18 @@ export function handleListed(listedEvent: ListedEvent): void {
   nft.collectionName = fetchCollectionName(listedEvent.params.tokenAddress);
   nft.uri = fetchUri(listedEvent.params.tokenAddress, listedEvent.params.tokenId)
   nft.price = listedEvent.params.price;
+  //add listing 
+  let saleId = listedEvent.address.toHex() + '-' + listedEvent.block.timestamp.toString();
+
+  let activity = Activity.load(saleId);
+  if (activity == null) {
+    activity = new Activity(saleId);
+  }
+  activity.type = "Listing";
+  activity.from = listedEvent.params.ownerAddress;
+  activity.to = Bytes.empty();
+  activity.timestamp = listedEvent.block.timestamp;
+
   nft.save()
 }
 
