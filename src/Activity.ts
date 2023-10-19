@@ -29,7 +29,9 @@ export function handleListed(listedEvent: ListedEvent): void {
   activity.from = listedEvent.params.ownerAddress;
   activity.to = Bytes.empty();
   activity.timestamp = listedEvent.block.timestamp;
-
+  activity.price = listedEvent.params.price;
+  
+  activity.save();
   nft.save()
 }
 
