@@ -19,7 +19,7 @@ export function handleListed(listedEvent: ListedEvent): void {
   nft.uri = fetchUri(listedEvent.params.tokenAddress, listedEvent.params.tokenId)
   nft.price = listedEvent.params.price;
   //add listing 
-  let saleId = listedEvent.address.toHex() + '-' + listedEvent.block.timestamp.toString();
+  let saleId = listedEvent.address.toHex() + '-' + listedEvent.params.tokenId.toString() + '-' + listedEvent.block.timestamp.toString();
 
   let activity = Activity.load(saleId);
   if (activity == null) {
@@ -37,7 +37,7 @@ export function handleListed(listedEvent: ListedEvent): void {
 }
 
 export function handleSale(saleEvent: SaleEvent): void{
-  let saleId = saleEvent.address.toHex() + '-' + saleEvent.block.timestamp.toString();
+  let saleId = saleEvent.address.toHex() + '-' + saleEvent.params.tokenId.toString() + '-' + saleEvent.block.timestamp.toString();
   let tokenId = saleEvent.params.tokenAddress.toHex() + '-' + saleEvent.params.tokenId.toString();
   let activity = Activity.load(saleId);
   if (activity == null) {
